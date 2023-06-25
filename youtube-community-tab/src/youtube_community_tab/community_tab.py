@@ -119,16 +119,19 @@ class CommunityTab(object):
                     post_data["channelId"] = self.channel_id
                     self.posts.append(Post.from_data(post_data))
                 elif post_kind == "sharedPostRenderer":
-                    # TODO: parse data from item[kind]["post"]["sharedPostRenderer"]["originalPost"]["backstagePostRenderer"]
                     post_data = item[kind]["post"]["sharedPostRenderer"]
                     post_data["channelId"] = self.channel_id
-                    post_data["authorText"] = post_data["displayName"]
-                    post_data["authorEndpoint"] = post_data["endpoint"]
-                    post_data.pop("displayName")
-                    post_data.pop("endpoint")
+                    post_data["authorText"] = post_data.pop("displayName")
+                    post_data["authorEndpoint"] = post_data.pop("endpoint")
+                    post_data["contentText"] = post_data.pop("content")
+
+                    original_post_data = post_data.pop("originalPost")["backstagePostRenderer"]
+                    original_post_data["channelId"] = original_post_data["authorEndpoint"]["browseEndpoint"]["browseId"]
+                    post_data["originalPost"] = Post.from_data(original_post_data)
+
                     self.posts.append(Post.from_data(post_data))
                 else:
-                    raise Exception(f"[post_kind={post_kind} is not implemented yet!]")
+                    raise NotImplementedError(f"[post_kind={post_kind} is not implemented yet!]")
             elif kind == "continuationItemRenderer":
                 self.posts_continuation_token = item[kind]["continuationEndpoint"]["continuationCommand"]["token"]
                 there_is_no_continuation_token = False

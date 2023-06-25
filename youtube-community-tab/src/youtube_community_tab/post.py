@@ -21,7 +21,7 @@ class Post(object):
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>"
     }
 
-    def __init__(self, post_id, channel_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text = None):
+    def __init__(self, post_id, channel_id, author=None, content_text=None, backstage_attachment=None, vote_count=None, sponsor_only_badge=None, published_time_text=None, original_post=None):
         self.post_id = post_id
         self.channel_id = channel_id
         self.author = author
@@ -30,6 +30,7 @@ class Post(object):
         self.vote_count = vote_count
         self.sponsor_only_badge = sponsor_only_badge
         self.published_time_text = published_time_text
+        self.original_post = original_post
 
         self.first = True
         self.comments = []
@@ -46,9 +47,10 @@ class Post(object):
             "content_text": self.content_text,
             "backstage_attachment": self.backstage_attachment,
             "vote_count": self.vote_count,
-            "sponsor_only_badge": self.sponsor_only_badge
+            "sponsor_only_badge": self.sponsor_only_badge,
+            "original_post": self.original_post and self.original_post.as_json()
         }
-    
+
     def get_published_string(self):
         return self.published_time_text
 
@@ -69,11 +71,23 @@ class Post(object):
 
         m = re.findall(Post.REGEX["YT_INITIAL_DATA"], r.text)
         data = json.loads(m[0])
-
         community_tab = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]
         community_tab_items = Post.get_items_from_community_tab(community_tab)
 
-        post_data = community_tab_items[0]["backstagePostThreadRenderer"]["post"]["backstagePostRenderer"]
+        post_data_item = community_tab_items[0]["backstagePostThreadRenderer"]["post"]
+        if "sharedPostRenderer" in post_data_item:
+            original_post_data = post_data_item["sharedPostRenderer"]["originalPost"]["backstagePostRenderer"]
+            original_post_data["channelId"] = original_post_data["authorEndpoint"]["browseEndpoint"]["browseId"]
+
+            post_data = post_data_item["sharedPostRenderer"]
+            post_data["contentText"] = post_data.pop("content")
+            post_data["authorText"] = post_data.pop("displayName")
+            post_data["authorEndpoint"] = post_data.pop("endpoint")
+
+            post_data["originalPost"] = Post.from_data(original_post_data)
+        else:
+            post_data = post_data_item["backstagePostRenderer"]
+
         post_data["channelId"] = data["metadata"]["channelMetadataRenderer"]["externalId"]
 
         post = Post.from_data(post_data)
@@ -321,7 +335,8 @@ class Post(object):
             backstage_attachment=clean_backstage_attachment(safely_get_value_from_key(data, "backstageAttachment", default=None)),
             vote_count=safely_get_value_from_key(data, "voteCount"),
             sponsor_only_badge=safely_get_value_from_key(data, "sponsorsOnlyBadge", default=None),
-            published_time_text = safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None)
+            published_time_text=safely_get_value_from_key(data, "publishedTimeText", "runs", 0, "text", default=None),
+            original_post=safely_get_value_from_key(data, "originalPost", default=None)
         )
 
         post.raw_data = data
