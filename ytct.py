@@ -121,12 +121,16 @@ def get_channel_posts(channel_id, post_archive):
 
 def handle_post(post):
     post_j = post.as_json()
+    if post.original_post is not None:
+        if args.dates:
+            post_j["original_post"]["_published"] = get_timestamp_metadata(post.original_post)
+        handle_post(post.original_post)
     component = f"post:{post.post_id}"
     post_file_name = f"{post.post_id}"
     post_file_dir = os.path.join(args.directory)
     post_file_path = os.path.join(post_file_dir, post_file_name)
     if args.dates:
-        timestamp_info = handle_post_timestamp(post, post_file_path)
+        timestamp_info = get_timestamp_metadata(post)
         post_j["_published"] = timestamp_info
     try:
         if not os.path.isdir(post_file_dir):
@@ -145,12 +149,16 @@ def handle_post(post):
     if post.backstage_attachment:
         handle_post_attachments(component, post.backstage_attachment, post_file_path)
 
-def handle_post_timestamp(post, path):
+def get_timestamp_metadata(post):
     timestamp_obj = {}
     # last updated time
     timestamp_obj["lastUpdatedTimestamp"] = int(datetime.utcnow().timestamp())
     # string as it appears on YouTube
     timestamp_obj["lastPublishedString"] = post.get_published_string()
+    return timestamp_obj
+
+def handle_post_timestamp(post, path):
+    timestamp_obj = get_timestamp_metadata(post)
     # code removed for the time being to prevent trashing files of inexperienced users
     # the closest UTC timestamp, and the seconds difference from the furthest UTC timestamp
     # diff_to_nearest_possible_date, timestamp_obj["timestampAccuracy"], timestamp_obj["is_edited"] = get_time_diff_from_text(timestamp_obj["lastPublishedString"])
@@ -181,7 +189,6 @@ def handle_post_timestamp(post, path):
     #         except Exception as e:
     #             print_log("community post", f"failed to open previously downloaded post {post.post_id}")
     #             print_log("community post", str(e))
-    return timestamp_obj
 
 def get_time_diff_from_text(published_text):
     post_date_m = re.search(POST_DATE_REGEX, published_text)
