@@ -74,21 +74,7 @@ class Post(object):
         community_tab = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]
         community_tab_items = Post.get_items_from_community_tab(community_tab)
 
-        post_data_item = community_tab_items[0]["backstagePostThreadRenderer"]["post"]
-        if "sharedPostRenderer" in post_data_item:
-            original_post_data = post_data_item["sharedPostRenderer"]["originalPost"]["backstagePostRenderer"]
-            original_post_data["channelId"] = original_post_data["authorEndpoint"]["browseEndpoint"]["browseId"]
-
-            post_data = post_data_item["sharedPostRenderer"]
-            post_data["contentText"] = post_data.pop("content")
-            post_data["authorText"] = post_data.pop("displayName")
-            post_data["authorEndpoint"] = post_data.pop("endpoint")
-
-            post_data["originalPost"] = Post.from_data(original_post_data)
-        else:
-            post_data = post_data_item["backstagePostRenderer"]
-
-        post_data["channelId"] = data["metadata"]["channelMetadataRenderer"]["externalId"]
+        post_data = community_tab_items[0]["backstagePostThreadRenderer"]["post"]
 
         post = Post.from_data(post_data)
         post.get_first_continuation_token(data)
@@ -311,7 +297,23 @@ class Post(object):
             raise e
 
     @staticmethod
-    def from_data(data):
+    def from_data(post_data):
+        if "sharedPostRenderer" in post_data:
+            data = post_data["sharedPostRenderer"]
+            data["contentText"] = data.pop("content")
+            data["authorText"] = data.pop("displayName")
+            data["authorEndpoint"] = data.pop("endpoint")
+
+            original_post_data = post_data["sharedPostRenderer"]["originalPost"]
+            data["originalPost"] = Post.from_data(original_post_data)
+
+        elif "backstagePostRenderer" in post_data:
+            data = post_data["backstagePostRenderer"]
+        else:
+            raise NotImplementedError(f"[post_kind={list(post_data.keys())[0]} is not implemented yet!]")
+
+        data["channelId"] = data["authorEndpoint"]["browseEndpoint"]["browseId"]
+
         # clean the author cause it's different here for some reason
         for item in data["authorText"]["runs"]:
             item["browseEndpoint"] = item["navigationEndpoint"]["browseEndpoint"]
