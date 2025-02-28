@@ -34,7 +34,9 @@ def get_arguments():
     parser.add_argument("-d", "--directory", type=str, help="save directory (defaults to current)", default=os.getcwd())
     parser.add_argument("--post-archive", metavar="FILE", type=str, help="download only posts not listed in the archive file and record the IDs of newly downloaded posts")
     parser.add_argument("--dates", action="store_true", help="write information about the post publish date")
+    parser.add_argument("-r", "--reverse", action="store_true", help="download posts from oldest to newest")
     parser.add_argument("links", metavar="CHANNEL", nargs="*", help="youtube channel or community post link/id")
+    parser.add_argument("--skip-download", action="store_true", help="skip downloading posts, intended for writing log")
     return parser.parse_args()
 
 def use_default_cookies():
@@ -110,11 +112,14 @@ def get_channel_posts(channel_id, post_archive):
     if post_archive:
         with open(post_archive, "r") as archive_file:
             skip_ids = archive_file.read().splitlines()
+    if args.reverse:
+        ct.posts = reversed(ct.posts)
     for post in ct.posts:
         if len(skip_ids) > 0 and post.post_id in skip_ids:
             print_log(f"post:{post.post_id}", f"already recorded in archive")
             continue
-        handle_post(post)
+        if not args.skip_download:    
+            handle_post(post)
         if post_archive:
             with open(post_archive, "a") as archive_file:
                 archive_file.write(f"{post.post_id}\n")
@@ -276,6 +281,14 @@ if __name__ == "__main__":
         use_default_cookies()
     usable_archive = None
     if args.post_archive:
+        #making sure the directory of the log exists, create if necessary
+        log_path = os.path.dirname(args.post_archive)
+        if not os.path.isdir(log_path):
+            try:
+                os.makedirs(log_path)
+            except:
+                print_log("ytct", "failed to create log directory")
+        
         try:
             open(args.post_archive, "a")
             usable_archive = args.post_archive
