@@ -28,4 +28,5 @@ OR
 --post-archive FILE           download only posts not listed in the archive file
                               and record the IDs of newly downloaded posts
 --dates                       write information about the post publish date
+-r, --reverse                 set download order from oldest to newest post.
 ```
