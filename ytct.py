@@ -36,6 +36,7 @@ def get_arguments():
     parser.add_argument("--dates", action="store_true", help="write information about the post publish date")
     parser.add_argument("-r", "--reverse", action="store_true", help="download posts from oldest to newest")
     parser.add_argument("links", metavar="CHANNEL", nargs="*", help="youtube channel or community post link/id")
+    parser.add_argument("--skip-download", action="store_true", help="skip downloading posts, intended for writing log")
     return parser.parse_args()
 
 def use_default_cookies():
@@ -117,7 +118,8 @@ def get_channel_posts(channel_id, post_archive):
         if len(skip_ids) > 0 and post.post_id in skip_ids:
             print_log(f"post:{post.post_id}", f"already recorded in archive")
             continue
-        handle_post(post)
+        if not args.skip_download:    
+            handle_post(post)
         if post_archive:
             with open(post_archive, "a") as archive_file:
                 archive_file.write(f"{post.post_id}\n")
