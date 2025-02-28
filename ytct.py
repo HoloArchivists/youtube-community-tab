@@ -279,6 +279,14 @@ if __name__ == "__main__":
         use_default_cookies()
     usable_archive = None
     if args.post_archive:
+        #making sure the directory of the log exists, create if necessary
+        log_path = os.path.dirname(args.post_archive)
+        if not os.path.isdir(log_path):
+            try:
+                os.makedirs(log_path)
+            except:
+                print_log("ytct", "failed to create log directory")
+        
         try:
             open(args.post_archive, "a")
             usable_archive = args.post_archive
