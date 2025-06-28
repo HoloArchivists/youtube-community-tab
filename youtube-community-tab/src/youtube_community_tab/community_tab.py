@@ -9,14 +9,14 @@ from .post import Post
 
 class CommunityTab(object):
     FORMAT_URLS = {
-        "COMMUNITY_TAB": "https://www.youtube.com/{}/{}/community",
+        "COMMUNITY_TAB": "https://www.youtube.com/{}/{}/posts",
         # HARD_CODED: This key seems to be constant to everyone, IDK
         "BROWSE_ENDPOINT": "https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
     }
 
     REGEX = {
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
-        "COMMUNITY_TAB_URL": "^\/.*\/community$"
+        "COMMUNITY_TAB_URL": "^\/.*\/posts$"
     }
 
     def __init__(self, channel_name):
