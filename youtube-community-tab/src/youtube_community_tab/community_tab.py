@@ -16,7 +16,7 @@ class CommunityTab(object):
 
     REGEX = {
         "YT_INITIAL_DATA": "ytInitialData = ({(?:(?:.|\n)*)?});</script>",
-        "COMMUNITY_TAB_URL": "^\/.*\/community$"
+        "COMMUNITY_TAB_URL": "^\/.*\/posts$"
     }
 
     def __init__(self, channel_name):
