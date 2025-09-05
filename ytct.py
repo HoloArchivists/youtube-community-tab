@@ -14,7 +14,7 @@ from youtube_community_tab.community_tab import CommunityTab
 
 POST_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/)((?:channel\/UC[a-zA-Z0-9_-]+\/community\?lb=)|post\/))?(?P<post_id>Ug[a-zA-Z0-9_-]+)(.*)?$"
 CHANNEL_REGEX=r"^(?:(?:https?:\/\/)?(?:.*?\.)?(?:youtube\.com\/))((?P<channel_handle>@[a-zA-Z0-9_-]+)|((channel\/)?(?P<channel_id>UC[a-zA-Z0-9_-]+)))(?:\/.*)?$"
-HANDLE_TO_ID_REGEX=r"\"header\":\{\"c4TabbedHeaderRenderer\":\{\"channelId\":\"(?P<channel_id>UC[a-zA-Z0-9_-]+)\""
+HANDLE_TO_ID_REGEX=r"meta property=\"og:url\" content=\"https:\/\/www.youtube.com\/channel\/(?P<channel_id>UC[a-zA-Z0-9_-]+)\""
 POST_DATE_REGEX=r"(?P<magnitude>[0-9]{1,2}) (?P<unit>(second|minute|hour|day|week|month|year))s? ago(?P<edited> \(edited\))?$"
 CLEAN_FILENAME_KINDA=r"[^\w\-_\. \[\]\(\)]"
 BLOCK_SIZE = 1024
