@@ -47,15 +47,36 @@ def clean_backstage_attachment(attachment):
             )
 
             for long_by_line in safe(attachment, "videoRenderer", "longBylineText", "runs", default=[]):
-                long_by_line["browseEndpoint"] = long_by_line["navigationEndpoint"]["browseEndpoint"]
+                if "browseEndpoint" in long_by_line["navigationEndpoint"]:
+                    long_by_line["browseEndpoint"] = long_by_line["navigationEndpoint"]["browseEndpoint"]
+                else:
+                    browseEndpoints = []
+                    for list_item in safe(long_by_line, "navigationEndpoint", "showDialogCommand", "panelLoadingStrategy", "inlineContent", "dialogViewModel", "customContent", "listViewModel", "listItems", default=[]):
+                        browseEndpoints += list_item["listItemViewModel"]["rendererContext"]["commandContext"]["onTap"]["innertubeCommand"]["browseEndpoint"]
+                    if browseEndpoints:
+                        long_by_line["browseEndpoints"] = browseEndpoints
                 long_by_line.pop("navigationEndpoint")
 
             for short_by_line in safe(attachment, "videoRenderer", "shortBylineText", "runs", default=[]):
-                short_by_line["browseEndpoint"] = short_by_line["navigationEndpoint"]["browseEndpoint"]
+                if "browseEndpoint" in short_by_line["navigationEndpoint"]:
+                    short_by_line["browseEndpoint"] = short_by_line["navigationEndpoint"]["browseEndpoint"]
+                else:
+                    browseEndpoints = []
+                    for list_item in safe(short_by_line, "navigationEndpoint", "showDialogCommand", "panelLoadingStrategy", "inlineContent", "dialogViewModel", "customContent", "listViewModel", "listItems", default=[]):
+                        browseEndpoints += list_item["listItemViewModel"]["rendererContext"]["commandContext"]["onTap"]["innertubeCommand"]["browseEndpoint"]
+                    if browseEndpoints:
+                        short_by_line["browseEndpoints"] = browseEndpoints
                 short_by_line.pop("navigationEndpoint")
 
             for author in safe(attachment, "videoRenderer", "ownerText", "runs", default=[]):
-                author["browseEndpoint"] = author["navigationEndpoint"]["browseEndpoint"]
+                if "browseEndpoint" in author["navigationEndpoint"]:
+                    author["browseEndpoint"] = author["navigationEndpoint"]["browseEndpoint"]
+                else:
+                    browseEndpoints = []
+                    for list_item in safe(author, "navigationEndpoint", "showDialogCommand", "panelLoadingStrategy", "inlineContent", "dialogViewModel", "customContent", "listViewModel", "listItems", default=[]):
+                        browseEndpoints += list_item["listItemViewModel"]["rendererContext"]["commandContext"]["onTap"]["innertubeCommand"]["browseEndpoint"]
+                    if browseEndpoints:
+                        author["browseEndpoints"] = browseEndpoints
 
             for value in [
                 "publishedTimeText",

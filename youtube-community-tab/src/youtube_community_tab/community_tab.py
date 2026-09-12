@@ -38,8 +38,6 @@ class CommunityTab(object):
 
         # Add authorization header
         current_cookies = dict_from_cookiejar(requests_cache.cookies)
-        if "SAPISID" in current_cookies:
-            headers["Authorization"] = get_auth_header(current_cookies["SAPISID"])
 
         if self.posts_continuation_token is None:
             try:
@@ -83,10 +81,14 @@ class CommunityTab(object):
             )
             self.append_posts_from_items(community_tab_items)
         elif self.posts_continuation_token is not False:
+            if "SAPISID" in current_cookies:
+                headers["Authorization"] = get_auth_header(current_cookies["SAPISID"])
             headers.update(
                 {
                     "X-Goog-AuthUser": self.session_index,
+                    "X-Goog-Visitor-Id": self.visitor_data,
                     "X-Origin": "https://www.youtube.com",
+                    "X-Youtube-Bootstrap-Logged-In": "true",
                     "X-Youtube-Client-Name": "1",
                     "X-Youtube-Client-Version": CLIENT_VERSION
                 }
